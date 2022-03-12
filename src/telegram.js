@@ -2220,7 +2220,7 @@ class TelegramBot extends EventEmitter {
    * @see https://core.telegram.org/bots/api#createnewstickerset
    * @todo Add tests for this method!
    */
-  createNewStickerSet(userId, name, title, pngSticker, emojis, options = {}, fileOptions = {}) {
+  createNewStickerSet(userId, name, title, pngSticker, emojis, options = {}, fileOptions = {}, animated = false) {
     const opts = {
       qs: options,
     };
@@ -2230,9 +2230,15 @@ class TelegramBot extends EventEmitter {
     opts.qs.emojis = emojis;
     opts.qs.mask_position = stringify(options.mask_position);
     try {
-      const sendData = this._formatSendData('png_sticker', pngSticker, fileOptions);
+      let sendData;
+      if (animated) {
+        sendData = this._formatSendData('webm_sticker', pngSticker, fileOptions);
+        opts.qs.webm_sticker = sendData[1];
+      } else {
+        sendData = this._formatSendData('png_sticker', pngSticker, fileOptions);
+        opts.qs.png_sticker = sendData[1];
+      }
       opts.formData = sendData[0];
-      opts.qs.png_sticker = sendData[1];
     } catch (ex) {
       return Promise.reject(ex);
     }
@@ -2254,7 +2260,7 @@ class TelegramBot extends EventEmitter {
    * @see https://core.telegram.org/bots/api#addstickertoset
    * @todo Add tests for this method!
    */
-  addStickerToSet(userId, name, pngSticker, emojis, options = {}, fileOptions = {}) {
+  addStickerToSet(userId, name, pngSticker, emojis, options = {}, fileOptions = {}, animated = false) {
     const opts = {
       qs: options,
     };
@@ -2263,9 +2269,15 @@ class TelegramBot extends EventEmitter {
     opts.qs.emojis = emojis;
     opts.qs.mask_position = stringify(options.mask_position);
     try {
-      const sendData = this._formatSendData('png_sticker', pngSticker, fileOptions);
+      let sendData;
+      if (animated) {
+        sendData = this._formatSendData('webm_sticker', pngSticker, fileOptions);
+        opts.qs.webm_sticker = sendData[1];
+      } else {
+        sendData = this._formatSendData('png_sticker', pngSticker, fileOptions);
+        opts.qs.png_sticker = sendData[1];
+      }
       opts.formData = sendData[0];
-      opts.qs.png_sticker = sendData[1];
     } catch (ex) {
       return Promise.reject(ex);
     }
