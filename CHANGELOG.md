@@ -3,6 +3,81 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.59.0][0.59.0] - 2022-08-15
+
+1. Support Telegram Bot API v6.2 (@danielperez9430)
+ * getCustomEmojiStickers
+
+2. Support test enviroment (@tinsaeDev & @kamikazechaser)
+
+3. Remove dependencies: (@danielperez9430)
+   * Remove *bluebird* => Use NodeJS Native Promises
+   * Remove *depd* => Use node native deprecate util for warnings
+   * Remove contributor dev dependency and add list of contributors in the readme
+
+4. Remove legacy methods: (@danielperez9430)
+  * getChatMembersCount
+  * kickChatMember
+
+5. Docs: (@danielperez9430)
+ * Update the docs of the methods
+ * Order methods follow the Telegram bot API docs in src/telegram.js
+ * Update README
+
+6. Fix: (@danielperez9430)
+ * addStickerToSet() -> Allow to send tgs_sticker + webm_sticker
+ * Remove mandatory param “start_parameter” from sendInvoice, because in the docs is a optional param
+ * getStickerSet test fix deprecated response value "contains_masks" change to "sticker_type"
+ * Fix some other tests
+
+7. New Test: (@danielperez9430)
+ * deleteStickerFromSet
+ * setStickerPositionInSet
+ * getCustomEmojiStickers
+
+## [0.58.0][0.58.0] - 2022-06-22
+
+1. Support Bot API v6.1: (@danielperez9430)
+   * Add method *createInvoiceLink()*
+
+2. Support for setStickerSetThumb (@elihaidv)
+
+3. Add new test (@danielperez9430)
+   * createInvoiceLink
+
+4. Test fixes (@danielperez9430)
+   * sendVideoNote
+   * createNewStickerSet
+   * setStickerSetThumb
+   * getChatMenuButton
+   * setWebHook
+
+5. Bug fixes (@danielperez9430)
+   * answerWebAppQuery
+   * Support for send thumb in sendAudio 
+
+## [0.57.0][0.57.0] - 2022-04-23
+
+Added:
+
+1. Support Bot API v6: (@danielperez9430)
+
+   * Add method *setChatMenuButton()*
+   * Add method *getChatMenuButton()*
+   * Add method *setMyDefaultAdministratorRights()*
+   * Add method *getMyDefaultAdministratorRights()*
+   * Add method *answerWebAppQuery()*
+   * Renamed the fields voice_chat_scheduled, voice_chat_started, voice_chat_ended, and voice_chat_participants_invited to video_chat_scheduled, video_chat_started, video_chat_ended, and video_chat_participants_invited 
+
+
+   Tests:
+
+   * answerWebAppQuery
+   * setChatMenuButton
+   * getChatMenuButton
+   * setMyDefaultAdministratorRights
+   * getMyDefaultAdministratorRights
+
 ## [0.56.0][0.56.0] - 2021-12-07
 
 Added:
