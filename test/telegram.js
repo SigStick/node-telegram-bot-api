@@ -1,5 +1,5 @@
 const TelegramBot = require('..');
-const request = require('request-promise');
+const request = require('@cypress/request-promise');
 const assert = require('assert');
 const fs = require('fs');
 const os = require('os');
@@ -50,6 +50,7 @@ let GAME_MSG_ID;
 let BOT_USERNAME;
 let CHAT_INFO;
 let STICKER_FILE_ID_FROM_SET;
+let STICKERS_FROM_BOT_SET;
 
 before(function beforeAll() {
   utils.startStaticServer(staticPort);
@@ -1418,6 +1419,74 @@ describe('TelegramBot', function telegramSuite() {
     });
   });
 
+  describe('#setMyDescription', function getMyCommandsSuite() {
+    it('should set bot description for users with a specific lang code', function test() {
+      return bot.setMyDescription({ description: 'Bot description' }).then(resp => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+    it('should set bot description for Spanish users', function test() {
+      return bot.setMyDescription({ description: 'Spanish bot description', language_code: 'es' }).then(resp => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#setMyName', function setMyNameSuite() {
+    it('should set bot name for Spanish users', function test() {
+      return bot.setMyName({ name: 'Spanish Bot', language_code: 'es' }).then(resp => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#getMyName', function setMyNameSuite() {
+    it('should get bot name for Spanish users', function test() {
+      return bot.getMyName({ language_code: 'es' }).then(resp => {
+        assert.ok(is.equal(resp.name, 'Spanish Bot'));
+      });
+    });
+  });
+
+  describe('#getMyDescription', function getMyDescriptionSuite() {
+    it('should get bot description for a user without lang code', function test() {
+      return bot.getMyDescription().then(resp => {
+        assert.ok(is.equal(resp.description, 'Bot description'));
+      });
+    });
+    it('should get bot description for Spanish users', function test() {
+      return bot.getMyDescription({ language_code: 'es' }).then(resp => {
+        assert.ok(is.equal(resp.description, 'Spanish bot description'));
+      });
+    });
+  });
+
+  describe('#setMyShortDescription', function setMyShortDescriptionSuite() {
+    it('should set sort bot description for a user without lang code', function test() {
+      return bot.setMyShortDescription({ short_description: 'Bot sort description' }).then(resp => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+    it('should set sort description for Spanish users', function test() {
+      return bot.setMyShortDescription({ short_description: 'Spanish bot sort description', language_code: 'es' }).then(resp => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#getMyShortDescription', function getMyShortDescriptionSuite() {
+    it('should get bot sort description for a user without lang code', function test() {
+      return bot.getMyShortDescription().then(resp => {
+        assert.ok(is.equal(resp.short_description, 'Bot sort description'));
+      });
+    });
+    it('should get bot sort description for Spanish users', function test() {
+      return bot.getMyShortDescription({ language_code: 'es' }).then(resp => {
+        assert.ok(is.equal(resp.short_description, 'Spanish bot sort description'));
+      });
+    });
+  });
+
   describe('#getMyCommands', function getMyCommandsSuite() {
     it('should get bot commands', function test() {
       return bot.getMyCommands().then(resp => {
@@ -1483,8 +1552,12 @@ describe('TelegramBot', function telegramSuite() {
           can_invite_users: true,
           can_restrict_members: false,
           can_pin_messages: true,
+          can_manage_topics: false,
           can_promote_members: false,
           can_manage_video_chats: false,
+          can_post_stories: false,
+          can_edit_stories: false,
+          can_delete_stories: false,
           is_anonymous: false
         }));
       });
@@ -1780,16 +1853,105 @@ describe('TelegramBot', function telegramSuite() {
     });
   });
 
-  describe('#setStickerSetThumb', function setStickerSetThumbSuite() {
+  describe('#setStickerEmojiList', function setStickerEmojiListSuite() {
     before(function before() {
-      utils.handleRatelimit(bot, 'setStickerSetThumb', this);
+      utils.handleRatelimit(bot, 'setStickerEmojiList', this);
+    });
+
+    it('should get the list for the given sticker of the bot sticker pack', function test(done) {
+      const stickerPackName = `s${CURRENT_TIMESTAMP}_by_${BOT_USERNAME}`;
+
+      bot.getStickerSet(stickerPackName).then(resp => {
+        STICKERS_FROM_BOT_SET = resp.stickers;
+        assert.ok(is.array(STICKERS_FROM_BOT_SET));
+      });
+
+      setTimeout(() => done(), 2000);
+    });
+
+    it('should set a emoji list for the given sticker', function test() {
+      assert.ok(is.equal(STICKERS_FROM_BOT_SET[0].type, 'regular'));
+
+      bot.setStickerEmojiList(STICKERS_FROM_BOT_SET[0].file_id, ['🥳', '😀', '😇']).then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#setStickerKeywords', function setStickerKeywordsSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'setStickerKeywords', this);
+    });
+    it('should set a keywords list for the given sticker', function test() {
+      assert.ok(is.equal(STICKERS_FROM_BOT_SET[0].type, 'regular'));
+      bot.setStickerKeywords(STICKERS_FROM_BOT_SET[0].file_id, { keywords: ['house', 'cat'] }).then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe.skip('#setStickerMaskPosition', function setStickerKeywordsSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'setStickerMaskPosition', this);
+    });
+    it('should delete a sticker from a set', function test() {
+      bot.setStickerMaskPosition(STICKER_FILE_ID_FROM_SET, { point: 'eyes', scale: 2, x_shift: 1, y_shift: 1 }).then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#setStickerSetTitle', function setStickerSetTitleSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'setStickerSetTitle', this);
+    });
+    it('should set a new sticker set title', function test() {
+      const stickerPackName = `s${CURRENT_TIMESTAMP}_by_${BOT_USERNAME}`;
+
+      bot.setStickerSetTitle(stickerPackName, 'New title').then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe('#setStickerSetThumbnail', function setStickerSetThumbnailSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'setStickerSetThumbnail', this);
     });
 
     it('should set a sticker set thumb', function test() {
       const stickerThumb = `${__dirname}/data/sticker_thumb.png`;
       const stickerPackName = `s${CURRENT_TIMESTAMP}_by_${BOT_USERNAME}`;
 
-      bot.setStickerSetThumb(USERID, stickerPackName, stickerThumb).then((resp) => {
+      bot.setStickerSetThumbnail(USERID, stickerPackName, stickerThumb).then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe.skip('#setCustomEmojiStickerSetThumbnail', function setCustomEmojiStickerSetThumbnailSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'setCustomEmojiStickerSetThumbnail', this);
+    });
+
+    it('should set a custom emoji sticjer set as thumbnail', function test() {
+      const stickerPackName = `s${CURRENT_TIMESTAMP}_by_${BOT_USERNAME}`;
+
+      bot.setCustomEmojiStickerSetThumbnail(stickerPackName, { custom_emoji_id: null }).then((resp) => {
+        assert.ok(is.boolean(resp));
+      });
+    });
+  });
+
+  describe.skip('#deleteStickerSet', function deleteStickerSetSuite() {
+    before(function before() {
+      utils.handleRatelimit(bot, 'deleteStickerSet', this);
+    });
+
+    it('should delete sticker set', function test() {
+      const stickerPackName = `s${CURRENT_TIMESTAMP}_by_${BOT_USERNAME}`;
+
+      bot.deleteStickerSet(stickerPackName).then((resp) => {
         assert.ok(is.boolean(resp));
       });
     });
@@ -1886,6 +2048,53 @@ describe('TelegramBot', function telegramSuite() {
       };
       return bot.getGameHighScores(USERID, opts).then(resp => {
         assert.ok(is.array(resp));
+      });
+    });
+  });
+
+  describe('#setMessageReaction', function setMessageReactionSuite() {
+    let messageId;
+    const Reactions = [{ type: 'emoji', emoji: '👍' }];
+    before(function before() {
+      utils.handleRatelimit(bot, 'setMessageReaction', this);
+      return bot.sendMessage(USERID, 'To be reacted').then(resp => {
+        messageId = resp.message_id;
+      });
+    });
+    it('should add reactions to message', function test() {
+      return bot.setMessageReaction(USERID, messageId, { reaction: Reactions, is_big: true }).then(resp => {
+        assert.strictEqual(resp, true);
+      });
+    });
+  });
+
+  describe('#deleteMessages', function setMessageReactionSuite() {
+    let messageId;
+    before(function before() {
+      utils.handleRatelimit(bot, 'deleteMessages', this);
+      return bot.sendMessage(USERID, 'To be deleted').then(resp => {
+        messageId = resp.message_id;
+      });
+    });
+    it('should delete message from array', function test() {
+      return bot.deleteMessages(USERID, [messageId]).then(resp => {
+        assert.strictEqual(resp, true);
+      });
+    });
+  });
+
+  describe('#copyMessages', function setMessageReactionSuite() {
+    let messageId;
+    before(function before() {
+      utils.handleRatelimit(bot, 'copyMessages', this);
+      return bot.sendMessage(GROUPID, 'To be copyed').then(resp => {
+        messageId = resp.message_id;
+      });
+    });
+    it('should copy messages from array', function test() {
+      return bot.copyMessages(USERID, GROUPID, [messageId]).then(resp => {
+        assert.ok(is.array(resp));
+        assert.ok(resp && resp.length === 1);
       });
     });
   });
